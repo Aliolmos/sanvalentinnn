@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>❤️ SOPA DE PALABRAS · San Valentín ❤️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #fce4e4 0%, #ffe9e9 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            margin: 0;
+        }
+
+        /* tarjeta principal romántica */
+        .valentine-card {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 3rem 3rem 2rem 2rem;
+            box-shadow: 0 25px 40px rgba(190, 40, 60, 0.25), 0 10px 15px rgba(200, 30, 50, 0.15);
+            padding: 2rem 1.5rem 2.5rem 1.5rem;
+            border: 2px solid #ffb7b7;
+            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            color: #b32e4a;
+            text-shadow: 2px 2px 0 #ffc2c2;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        h1 span {
+            font-size: 2.8rem;
+            line-height: 1;
+        }
+
+        .subhead {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #d45c6f;
+            background: #ffe2e2;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 0 auto 1.5rem auto;
+            width: fit-content;
+            border: 1px solid #ffa0a0;
+            box-shadow: 0 4px 8px #ffd0d0;
+        }
+
+        /* contenedor flex (grid + lista de palabras) */
+        .crossword-panel {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        /* zona de la sopa de letras */
+        .grid-section {
+            flex: 2 1 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* cuadrícula */
+        .word-grid {
+            display: inline-grid;
+            grid-template-columns: repeat(15, minmax(38px, 1fr));
+            background: #ffe5e5;
+            border: 4px solid #ff8a8a;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 20px #fbb6b6;
+            margin-bottom: 1rem;
+            width: fit-content;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            min-width: 38px;
+            background-color: #fff9f9;
+            border: 1px solid #fbb6b6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #a02442;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cell.selected {
+            background-color: #ffe0aa !important;
+            border: 2px solid #e07c3c;
+        }
+
+        .cell.marked {
+            background-color: #ffe0f0;
+            border: 2px solid #d44c6f;
+        }
+
+        /* palabras encontradas correctamente */
+        .cell.found-word {
+            background-color: #d1f0d1 !important;
+            border: 2px solid #2a8e2a;
+            color: #1b6b1b;
+            font-weight: 700;
+        }
+
+        .cell.found-word.marked {
+            background-color: #b8e0b8 !important;
+        }
+
+        /* palabras incorrectas (feedback visual) */
+        .cell.incorrect-mark {
+            background-color: #ffd6d6 !important;
+            border: 2px solid #c03b4b;
+        }
+
+        /* contador y botón */
+        .progress-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            background: #fff0f0;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            margin: 1rem 0 0.5rem 0;
+            border: 1px solid #ffb3b3;
+        }
+
+        .counter {
+            background: white;
+            border-radius: 40px;
+            padding: 0.5rem 1.3rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #b13b55;
+            box-shadow: 0 3px 0 #ffbaba;
+            border: 1px solid #ffa0b0;
+        }
+
+        .btn-verify {
+            background: #e33b5e;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            padding: 0.6rem 2.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #901a36, 0 8px 14px #ffbebe;
+            transition: 0.1s linear;
+            border: 1px solid #ff9494;
+            letter-spacing: 1px;
+        }
+
+        .btn-verify:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #901a36, 0 5px 10px #fca4a4;
+        }
+
+        .btn-clear {
+            background: #f5a9b8;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a14050;
+            transition: 0.1s linear;
+        }
+
+        /* panel de palabras a buscar */
+        .words-section {
+            flex: 1 1 280px;
+            background: #fff3f5;
+            border-radius: 40px;
+            padding: 1.8rem 1.5rem;
+            border: 2px solid #ffa5b9;
+            box-shadow: inset 0 2px 10px #ffe0e0, 0 10px 15px #fbc1c1;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .words-section h2 {
+            color: #b43b55;
+            font-weight: 600;
+            font-size: 1.8rem;
+            border-bottom: 2px dashed #f79090;
+            padding-bottom: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .word-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .word-item {
+            background: white;
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #ffb0b0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #922a41;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word-item.found {
+            background: #d1f0d1;
+            border-color: #2a8e2a;
+            color: #1b6b1b;
+            text-decoration: line-through 2px rgba(0,80,0,0.3);
+            order: 1;
+        }
+
+        .word-item.found::after {
+            content: "✓";
+            font-weight: bold;
+            color: green;
+            font-size: 1.4rem;
+        }
+
+        .word-item:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1rem;
+            color: #c0576c;
+        }
+
+        /* responsive */
+        @media (max-width: 680px) {
+            .valentine-card { padding: 1.5rem 0.8rem; }
+            .word-grid { grid-template-columns: repeat(15, minmax(32px, 1fr)); }
+            .cell { font-size: 1rem; }
+            .btn-verify { font-size: 1.2rem; padding: 0.5rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="valentine-card">
+    <h1>
+        <span>❤️</span> ENCUENTRA LAS PALABRAS <span>❤️</span>
+    </h1>
+    <div style="text-align: center;">
+        <span class="subhead">✨ selecciona las letras que forman cada palabra ✨</span>
+    </div>
+
+    <div class="crossword-panel">
+        <!-- CUADRÍCULA CON LETRAS DESORDENADAS -->
+        <div class="grid-section">
+            <div id="wordGridContainer" class="word-grid"></div>
+
+            <div class="progress-area">
+                <div class="counter" id="progressCounter">0 / 19</div>
+                <button class="btn-verify" id="verifyBtn">Verificar respuestas</button>
+                <button class="btn-clear" id="clearSelectionBtn">Limpiar selección</button>
+            </div>
+            <div style="font-size: 1rem; color: #ac3b4f;">💡 Haz clic en las letras para marcar una palabra (de principio a fin)</div>
+        </div>
+
+        <!-- LISTA DE PALABRAS A BUSCAR -->
+        <div class="words-section">
+            <h2>🌸 Palabras a encontrar 🌸</h2>
+            <div class="word-list" id="wordListContainer"></div>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color:#b04860;">👉 Toca una palabra para limpiar su selección actual</p>
+        </div>
+    </div>
+    <footer>hecho con 💖 para San Valentín · busca y marca</footer>
+</div>
+
+<script>
+    (function() {
+        // ------------------------------------------------------------
+        // LISTA DE PALABRAS (19)
+        const WORDS = [
+            "AMOR", "VIDA", "BUFON", "CONECTADAS", "TELEQUINESIS",
+            "AMORE", "RAM", "VIDEO", "EDITOR", "FEBRERO",
+            "PAZ", "LUCKYCAT", "CASA", "HOGAR", "CASAMIENTO",
+            "QUERER", "GIMNASIO", "FUERTE", "GRANDE"
+        ];
+
+        // ------------------------------------------------------------
+        // GENERAR CUADRÍCULA 15x15 CON LETRAS DESORDENADAS
+        const ROWS = 15;
+        const COLS = 15;
+
+        // Primero, crear un array con todas las letras necesarias para formar las palabras (sin repetir posiciones)
+        // Para que las palabras estén realmente presentes, insertamos sus letras en posiciones específicas (ocultas)
+        // Pero el usuario no lo sabe, solo ve letras al azar. 
+        // Creamos una matriz "solution" que contiene la disposición real de las palabras (horizontal o vertical)
+        // y luego la rellenamos con letras aleatorias adicionales.
+
+        // Creamos una matriz vacía para la solución (inicialmente todas las celdas como '')
+        const solutionGrid = Array(ROWS).fill().map(() => Array(COLS).fill(''));
+
+        // Definimos las posiciones de las palabras (pueden estar en horizontal o vertical)
+        // Usamos posiciones fijas para asegurar que las palabras existen.
+        const wordPositions = [
+            // [fila, columna, dirección, palabra]
+            [0, 0, 'H', "AMOR"],
+            [0, 5, 'H', "VIDA"],
+            [2, 0, 'H', "BUFON"],
+            [4, 0, 'H', "CONECTADAS"],
+            [7, 0, 'H', "TELEQUINESIS"],
+            [0, 10, 'H', "AMORE"],
+            [3, 10, 'H', "RAM"],
+            [5, 8, 'H', "VIDEO"],
+            [6, 2, 'H', "EDITOR"],
+            [9, 3, 'H', "FEBRERO"],
+            [11, 12, 'H', "PAZ"],
+            [12, 1, 'H', "LUCKYCAT"],
+            [9, 10, 'H', "CASA"],
+            [13, 4, 'H', "HOGAR"],
+            [10, 5, 'H', "CASAMIENTO"],
+            [14, 0, 'H', "QUERER"],
+            [2, 9, 'V', "GIMNASIO"],
+            [5, 13, 'V', "FUERTE"],
+            [8, 7, 'V', "GRANDE"]
+        ];
+
+        // Colocar las palabras en solutionGrid
+        wordPositions.forEach(([row, col, dir, word]) => {
+            for (let i = 0; i < word.length; i++) {
+                let r = row, c = col;
+                if (dir === 'H') c = col + i;
+                else r = row + i;
+                if (r < ROWS && c < COLS) {
+                    solutionGrid[r][c] = word[i];
+                }
+            }
+        });
+
+        // Rellenar las celdas vacías con letras aleatorias del abecedario (desordenadas)
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (solutionGrid[r][c] === '') {
+                    // letra aleatoria
+                    const randomIndex = Math.floor(Math.random() * alphabet.length);
+                    solutionGrid[r][c] = alphabet[randomIndex];
+                }
+            }
+        }
+
+        // ------------------------------------------------------------
+        // Variables de estado para selección
+        let selectedCells = []; // almacena {row, col} en orden
+        let currentWordIndex = -1; // índice de la palabra que se está seleccionando (si aplica)
+        const foundWords = new Array(WORDS.length).fill(false); // true si ya fue encontrada
+
+        // ------------------------------------------------------------
+        // Renderizar cuadrícula
+        const container = document.getElementById('wordGridContainer');
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.textContent = solutionGrid[r][c];
+                container.appendChild(cell);
+            }
+        }
+
+        // ------------------------------------------------------------
+        // Renderizar lista de palabras
+        const wordListDiv = document.getElementById('wordListContainer');
+        WORDS.forEach((word, index) => {
+            const wordItem = document.createElement('div');
+            wordItem.className = 'word-item';
+            wordItem.dataset.index = index;
+            wordItem.textContent = word;
+            wordItem.addEventListener('click', () => {
+                // Al hacer clic en la palabra, limpiamos la selección actual y la empezamos de nuevo para esta palabra
+                clearSelection();
+                currentWordIndex = index;
+                // Resaltar visualmente la palabra activa
+                document.querySelectorAll('.word-item').forEach(el => el.style.background = '');
+                wordItem.style.background = '#ffe0aa';
+            });
+            wordListDiv.appendChild(wordItem);
+        });
+
+        // ------------------------------------------------------------
+        // Función para limpiar selección
+        function clearSelection() {
+            selectedCells = [];
+            currentWordIndex = -1;
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('selected', 'marked', 'incorrect-mark');
+            });
+            document.querySelectorAll('.word-item').forEach(el => el.style.background = '');
+        }
+
+        document.getElementById('clearSelectionBtn').addEventListener('click', clearSelection);
+
+        // ------------------------------------------------------------
+        // Manejar clic en celdas
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                // Si la celda ya pertenece a una palabra encontrada, no permitir modificar
+                if (cell.classList.contains('found-word')) return;
+
+                // Si no hay palabra activa, no se puede seleccionar
+                if (currentWordIndex === -1) {
+                    alert('Selecciona primero una palabra de la lista');
+                    return;
+                }
+
+                // Si ya se encontró esta palabra, no permitir selección
+                if (foundWords[currentWordIndex]) return;
+
+                // Lógica de selección en orden
+                if (selectedCells.length === 0) {
+                    // Primera letra
+                    selectedCells.push({ row, col });
+                    cell.classList.add('selected');
+                } else {
+                    // Verificar que la nueva celda sea adyacente a la última en línea recta (horizontal o vertical)
+                    const last = selectedCells[selectedCells.length - 1];
+                    const sameRow = (row === last.row && Math.abs(col - last.col) === 1);
+                    const sameCol = (col === last.col && Math.abs(row - last.row) === 1);
+                    
+                    if (sameRow || sameCol) {
+                        // Verificar que no se salga de la dirección
+                        if (selectedCells.length > 1) {
+                            const first = selectedCells[0];
+                            const dir = (first.row === last.row) ? 'H' : 'V';
+                            if ((dir === 'H' && row !== first.row) || (dir === 'V' && col !== first.col)) {
+                                alert('Debes seguir la misma dirección (horizontal o vertical)');
+                                return;
+                            }
+                        }
+                        selectedCells.push({ row, col });
+                        cell.classList.add('selected');
+                    } else {
+                        alert('Las letras deben ser consecutivas en horizontal o vertical');
+                    }
+                }
+            });
+        });
+
+        // ------------------------------------------------------------
+        // Verificar respuestas
+        document.getElementById('verifyBtn').addEventListener('click', () => {
+            if (currentWordIndex === -1 || selectedCells.length === 0) {
+                alert('Selecciona una palabra y marca sus letras en orden');
+                return;
+            }
+
+            const word = WORDS[currentWordIndex];
+            
+            // Verificar que la longitud coincida
+            if (selectedCells.length !== word.length) {
+                markIncorrect();
+                return;
+            }
+
+            // Obtener las letras seleccionadas en orden
+            const selectedWord = selectedCells.map(pos => {
+                return solutionGrid[pos.row][pos.col];
+            }).join('');
+
+            if (selectedWord === word) {
+                // Palabra correcta
+                foundWords[currentWordIndex] = true;
+                
+                // Marcar celdas como encontradas
+                selectedCells.forEach(pos => {
+                    const cell = document.querySelector(`.cell[data-row='${pos.row}'][data-col='${pos.col}']`);
+                    cell.classList.add('found-word');
+                    cell.classList.remove('selected', 'marked', 'incorrect-mark');
+                });
+
+                // Marcar palabra en la lista como encontrada
+                const wordItem = document.querySelector(`.word-item[data-index='${currentWordIndex}']`);
+                wordItem.classList.add('found');
+                wordItem.style.background = '';
+
+                // Actualizar contador
+                const foundCount = foundWords.filter(v => v).length;
+                document.getElementById('progressCounter').innerText = `${foundCount} / ${WORDS.length}`;
+
+                // Animación suave en las celdas
+                selectedCells.forEach(pos => {
+                    const cell = document.querySelector(`.cell[data-row='${pos.row}'][data-col='${pos.col}']`);
+                    cell.style.transform = 'scale(1.1)';
+                    setTimeout(() => cell.style.transform = 'scale(1)', 200);
+                });
+
+                // Limpiar selección actual
+                clearSelection();
+
+                // Verificar si ya se completaron todas
+                if (foundCount === WORDS.length) {
+                    setTimeout(() => alert('¡Felicidades! Encontraste todas las palabras 💖'), 300);
+                }
+            } else {
+                markIncorrect();
+            }
+        });
+
+        function markIncorrect() {
+            // Marcar las celdas seleccionadas como incorrectas temporalmente
+            selectedCells.forEach(pos => {
+                const cell = document.querySelector(`.cell[data-row='${pos.row}'][data-col='${pos.col}']`);
+                cell.classList.add('incorrect-mark');
+                setTimeout(() => cell.classList.remove('incorrect-mark'), 500);
+            });
+            
+            // Limpiar selección para reintentar
+            setTimeout(() => {
+                clearSelection();
+                // Volver a seleccionar la misma palabra automáticamente
+                if (currentWordIndex !== -1 && !foundWords[currentWordIndex]) {
+                    const wordItem = document.querySelector(`.word-item[data-index='${currentWordIndex}']`);
+                    wordItem.style.background = '#ffe0aa';
+                }
+            }, 500);
+        }
+
+        // ------------------------------------------------------------
+        // Inicializar contador
+        document.getElementById('progressCounter').innerText = `0 / ${WORDS.length}`;
+
+        // Pequeña animación de bienvenida
+        setTimeout(() => {
+            document.querySelector('.valentine-card').style.transform = 'scale(1.01)';
+            setTimeout(() => document.querySelector('.valentine-card').style.transform = 'scale(1)', 150);
+        }, 200);
+    })();
+</script>
+</body>
+</html>
